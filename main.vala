@@ -4,7 +4,7 @@ int main(string[] argv)
 
     app.activate.connect(() =>
     {
-        new Gtk.ApplicationWindow(app).show();
+        new RootWindow(app).show();
     });
 
     return app.run(argv);
