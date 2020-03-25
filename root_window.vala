@@ -10,6 +10,8 @@ class RootWindow : Gtk.ApplicationWindow
         Object(application: app);
 
         Timeout.add(1000, this.refresh_current_time);
+
+        tasks.@foreach(row => create_task_for((row as Gtk.ListBoxRow).get_child()));
     }
 
     [GtkChild]
@@ -31,13 +33,11 @@ class RootWindow : Gtk.ApplicationWindow
             return;
         }
 
-        var task = new Task(Uuid.string_random(), entry.text);
-        id2task.@set(task.uuid, task);
-
-        var label = new Gtk.Label(task.name);
+        var label = new Gtk.Label(entry.text);
         label.visible = true;
-        label.set_data("uuid", task.uuid);
         tasks.prepend(label);
+
+        create_task_for(label);
 
         entry.text = "";
     }
@@ -70,5 +70,12 @@ class RootWindow : Gtk.ApplicationWindow
             current_time.label = current.elapsed();
         }
         return true;
+    }
+
+    private void create_task_for(Gtk.Widget widget)
+    {
+        var task = new Task(Uuid.string_random(), (widget as Gtk.Label).label);
+        id2task.@set(task.uuid, task);
+        widget.set_data("uuid", task.uuid);
     }
 }
