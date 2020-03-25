@@ -5,4 +5,15 @@ class RootWindow : Gtk.ApplicationWindow
     {
         Object(application: app);
     }
+
+    [GtkChild]
+    private Gtk.ListBox tasks;
+
+    [GtkCallback]
+    private void onTaskAdded()
+    {
+        var label = new Gtk.Label("hello");
+        label.visible = true;
+        tasks.prepend(label);
+    }
 }
