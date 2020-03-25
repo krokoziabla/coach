@@ -14,12 +14,10 @@
         <property name="orientation">vertical</property>
         <property name="homogeneous">True</property>
         <child>
-          <object class="GtkButton">
-            <property name="label" translatable="yes">button</property>
+          <object class="GtkEntry">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <signal name="clicked" handler="onTaskAdded" swapped="no"/>
+            <signal name="activate" handler="on_task_added" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -36,6 +34,7 @@
               <object class="GtkListBox" id="tasks">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <signal name="row-selected" handler="on_task_selected" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -44,15 +43,25 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="current_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">label</property>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="current_time">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>
