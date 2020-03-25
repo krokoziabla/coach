@@ -14,6 +14,18 @@ class RootWindow : Gtk.ApplicationWindow
         tasks.@foreach(row => create_task_for((row as Gtk.ListBoxRow).get_child()));
     }
 
+    public override void destroy()
+    {
+        base.destroy();
+
+        var i = id2task.iterator();
+        while (i.next())
+        {
+            var task = i.@get().value;
+            print("%s\t%s\n", task.name, task.elapsed());
+        }
+    }
+
     [GtkChild]
     private Gtk.ListBox tasks;
 
