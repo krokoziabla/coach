@@ -32,9 +32,6 @@ class RootWindow : Gtk.ApplicationWindow
     [GtkChild]
     private Gtk.Label current_time;
 
-    [GtkChild]
-    private Gtk.Label current_label;
-
     private Task? current;
 
     [GtkCallback]
@@ -70,7 +67,6 @@ class RootWindow : Gtk.ApplicationWindow
 
         current = id2task.@get(row.get_child().get_data("uuid"));
         current.start();
-        current_label.label = current.name;
 
         refresh_current_time();
     }
