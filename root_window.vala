@@ -22,7 +22,7 @@ class RootWindow : Gtk.ApplicationWindow
         while (i.next())
         {
             var task = i.@get().value;
-            print("%s\t%s\n", task.name, task.elapsed());
+            print("%s\t%s\n", task.name, format_time(task.elapsed_time));
         }
     }
 
@@ -33,6 +33,7 @@ class RootWindow : Gtk.ApplicationWindow
     private Gtk.Label current_time;
 
     private Task? current;
+    private Timer timer = new Timer();
 
     [GtkCallback]
     private void on_task_added(Gtk.Entry entry)
@@ -54,9 +55,10 @@ class RootWindow : Gtk.ApplicationWindow
     [GtkCallback]
     private void on_task_selected(Gtk.ListBox tasks, Gtk.ListBoxRow? row)
     {
+        timer.stop();
         if (current != null)
         {
-            current.stop();
+            current.elapsed_time += timer.elapsed();
             current = null;
         }
 
@@ -66,7 +68,7 @@ class RootWindow : Gtk.ApplicationWindow
         }
 
         current = id2task.@get(row.get_child().get_data("uuid"));
-        current.start();
+        timer.start();
 
         refresh_current_time();
     }
@@ -75,7 +77,7 @@ class RootWindow : Gtk.ApplicationWindow
     {
         if (current != null)
         {
-            current_time.label = current.elapsed();
+            current_time.label = format_time(current.elapsed_time + timer.elapsed());
         }
         return true;
     }
@@ -85,5 +87,10 @@ class RootWindow : Gtk.ApplicationWindow
         var task = new Task(Uuid.string_random(), (widget as Gtk.Label).label);
         id2task.@set(task.uuid, task);
         widget.set_data("uuid", task.uuid);
+    }
+
+    private static string format_time(double time)
+    {
+        return new DateTime.from_unix_utc((int64) time).format("%T");
     }
 }
