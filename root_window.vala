@@ -3,27 +3,19 @@ using Gee;
 [GtkTemplate (ui = "/krokoziabla/coach/root_window.glade")]
 class RootWindow : Gtk.ApplicationWindow
 {
-    private Map<string, Task> id2task = new HashMap<string, Task>();
-
     public RootWindow(Gtk.Application app)
     {
         Object(application: app);
 
         Timeout.add(1000, this.refresh_current_time);
 
-        tasks.@foreach(row => create_task_for((row as Gtk.ListBoxRow).get_child()));
-    }
-
-    public override void destroy()
-    {
-        base.destroy();
-
-        var i = id2task.iterator();
-        while (i.next())
+        if ( Sqlite.Database.open("main.db", out db) != Sqlite.OK )
         {
-            var task = i.@get().value;
-            print("%s\t%s\n", task.name, format_time(task.elapsed_time));
+            print("Cannot open db\n");
         }
+        tasks_dao = new TasksDao(db);
+
+        tasks.@foreach(row => create_task_for((row as Gtk.ListBoxRow).get_child()));
     }
 
     [GtkChild]
@@ -34,11 +26,13 @@ class RootWindow : Gtk.ApplicationWindow
 
     private Task? current;
     private Timer timer = new Timer();
+    private Sqlite.Database db;
+    private TasksDao tasks_dao;
 
     [GtkCallback]
     private void on_task_added(Gtk.Entry entry)
     {
-        if (entry.text == "")
+        if ( entry.text == "" )
         {
             return;
         }
@@ -56,18 +50,22 @@ class RootWindow : Gtk.ApplicationWindow
     private void on_task_selected(Gtk.ListBox tasks, Gtk.ListBoxRow? row)
     {
         timer.stop();
-        if (current != null)
+        if ( current != null )
         {
-            current.elapsed_time += timer.elapsed();
+            current.time += timer.elapsed();
+            tasks_dao.update(current);
             current = null;
         }
 
-        if (row == null)
+        if ( row == null )
         {
             return;
         }
 
-        current = id2task.@get(row.get_child().get_data("uuid"));
+        unowned var id = (uint8[]) row.get_child().get_data<uint *>("id");
+        id.length = row.get_child().get_data("id_size");
+        print("%d\n", id.length);
+        current = tasks_dao.read(id);
         timer.start();
 
         refresh_current_time();
@@ -75,18 +73,20 @@ class RootWindow : Gtk.ApplicationWindow
 
     private bool refresh_current_time()
     {
-        if (current != null)
+        if ( current != null )
         {
-            current_time.label = format_time(current.elapsed_time + timer.elapsed());
+            current_time.label = format_time(current.time + timer.elapsed());
         }
         return true;
     }
 
     private void create_task_for(Gtk.Widget widget)
     {
-        var task = new Task(Uuid.string_random(), (widget as Gtk.Label).label);
-        id2task.@set(task.uuid, task);
+        var task = new Task.with(Uuid.string_random(), (widget as Gtk.Label).label, 0);
+        tasks_dao.update(task);
         widget.set_data("uuid", task.uuid);
+        widget.set_data("id", task.id);
+        widget.set_data("id_size", task.id.length);
     }
 
     private static string format_time(double time)
