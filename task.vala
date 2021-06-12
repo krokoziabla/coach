@@ -1,12 +1,6 @@
-class Task
+interface Task : Object
 {
-    public string uuid;
-    public string name;
-    public double elapsed_time = 0u; // seconds
-
-    public Task(string uuid, string name)
-    {
-        this.uuid = uuid;
-        this.name = name;
-    }
+    public abstract string uuid { get; }
+    public abstract string name { get; }
+    public abstract double elapsed_time { get; set; } // seconds
 }
