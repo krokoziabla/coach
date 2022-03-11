@@ -6,25 +6,20 @@ class RootWindow : Gtk.ApplicationWindow, TaskView
         Object(application: app);
 
         presenter = new TaskPresenter(this);
-
-        tasks.@foreach(row => {
-            var label = (Gtk.Label) ((Gtk.ListBoxRow) row).get_child();
-            label.set_data("uuid", presenter.on_task_widget_created(label.label));
-        });
     }
 
     public override void destroy()
     {
-        presenter.print_tasks();
+        presenter.on_task_selected(null);
         base.destroy();
     }
 
 
     [GtkChild]
-    private Gtk.ListBox tasks;
+    private unowned Gtk.ListBox tasks;
 
     [GtkChild]
-    private Gtk.Label current_time;
+    private unowned Gtk.Label current_time;
 
     private TaskPresenter presenter;
 
@@ -47,11 +42,11 @@ class RootWindow : Gtk.ApplicationWindow, TaskView
             presenter.on_task_selected(null);
     }
 
-    public void create_widget(string text)
+    public void create_widget(string text, string uuid)
     {
         var label = new Gtk.Label(text);
         label.visible = true;
-        label.set_data("uuid", presenter.on_task_widget_created(label.label));
+        label.set_data("uuid", uuid);
         tasks.prepend(label);
     }
 
